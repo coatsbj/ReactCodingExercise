@@ -1,0 +1,26 @@
+{
+  "name": "BrainspaceCodingExercise",
+  "version": "0.1.0",
+  "description": "Charting Exercise Web App",
+  "main": "server.js",
+  "author": {
+    "name": "Ben Coats",
+    "email": "coatsbj@gmail.com"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "chart.js": "^1.1.1",
+    "express": "^4.13.4",
+    "fs": "^0.0.2",
+    "path": "^0.12.7",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "rc-slider": "^3.6.0",
+    "react-chartjs": "^0.7.3",
+    "react-select": "^1.0.0-beta12",
+    "request": "^2.72.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5"
+  }
+}

@@ -1,0 +1,48 @@
+.navbar-brand-logo {
+    height: 32px;
+    width: 32px;
+    margin-top: -6px;
+    margin-bottom: -6px;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFX0lEQVRYw8VXa0xTZxguYNQpLac32nNaKD29UihtBYoX5Kbg/YJYL5vzx8xmdIvGaTYZKgYiRaGCVAoIFWyrXIQpEoaKovMyp9nc3OZiYrK4XzU6L9ufhWTbu3POPguStrGhZCd58ubkPOd9n/Oe9zzfd1is//tYmJfzaGlBPizIyb429tr8+TlRFCbRMViOcfEyTEagMdNk9I4iRlCYQmEqihEBEo6fZzYaAME7ijyNwnQUgyUdP89sSAEELyKzKcSgGBkgaWSovONq1eJOmay5WSR67zVSeooeELxIYdiLNyZq9QNy+bBbIIBGPh9sGLbWR0zTJwODFP1j1KawFqfjubi4JX0EAbQAO4ZBJZtd7iOnJuuARpo+6THqQFiL0+cNPB7vtEjEdKA2JuZFWXS0Dr3uKFZqUiIwSNY9DjJIkeOZDSubbT/AZvdZMWxOKYfDH/VVTGLN0GkBwRtq8Y0dd+Pf8Xzdtrxp0JVV2aHwx6PabaEEPCqdPp03Kt809ElGsUyJGkDwhvrkm3p+Glpx/Bbk1AzA3Ir2b8fyDnE4qioO52kFmz1zTD561qYwSYxaNSB4Q237hq77vyx3fgXZ1b2Qtt89nLm3uTBrc/Ek+tqBWHyqjcO5SwnY4SffiB8YNCpA8Alwx8enNsjln5QoSVOwd76q7XbfsqartIC/Mva1ueZW9f6YWXX2Qea+tm17tIYWq4g4E+BhRmbNoFYCAiOgNyEh46xSOdyC43AUF/9RwePF+yu+qP7S2kX287/O230kLXPzZ0q6SPruxoiC7bbcpdtt9+aWnYTc7TaXeUdtUtBOpqgUgMA44RkFWdYpIaA5Vgg1MTFQi2Hvjy2+5OhF9ZL6wd8KylrnjU1qJeI0R7ncpx/krlyRVuKsTC11PTHubrgys9ixbl3rtarCpsE782xndvqS6ZUkIDBOWK8gczsJYriVcixKwO99OP7sLI6fOy0W57fIyIgN2yqmLXNcureo+vPiscXrMOwtB5f7AxU/etX2OZaNYtOuui35R754sL79O8h3DEHW4XOQWubJZG5KVsiBBiXA54THRLHGOh7vQ8oyyeNCIbtbLN7ai+P3uwjJz5uKHZct1vZ+f+1s4vGc9Vxul78Bfrv9+49Xe+4yAsyVPWDc717+nwAyAWjoFfKgTrghf2HUjs17Hetrel+2ksrnThy3HxMItB0SCe6WyfZQi4ydEvDwUKwQ8/fOi5w3+SudN78paLjyd3p5e/+MXXWTGR9IkssgiZTRIoI64QqrJ7XIeePZmmJ7ti3JRLqEwoMnhcIn/ST5skMshhahEGr5/NpgA5dX0Rkxq6Ql5jUn1CXEA0JAJ1y85VORxXnjfmH9hZ2jk57GcWJAKoVTVHGq9VDOxa69oV2POGGiLA4QAjphUdOQx+K83uMvKTUbA1QnoE7A/6dUKNj2hmvFiBNqZVJA8OuEFseFretcdx4WNV7G/CW1JcimVkuIon1SSU4IC9WIE2rjJYDgE1BU3jx5dW1PSWFN9wlL261nq5zXTWFeJUdmTRNHAMKrPWHkxtYvy9e03oS8mn4Kfc9nH+yJDvcS7TvUUhwQfHvCdz13ela23IC8uouQXtENhv0ezYQUpw+VRAwIvj2hpf78ssK223/m2Qch/UDXBUOpO2JCitOHkhABDUrAa3vCxQ1DRO7h/oxZ1u6oCSvOCMBjGQEaKf4iO2t29ETsCYP8L0SxFGIhKCgROupLyNAqr6ZrlCf8wGVOVJ8y6zTtdKTPx8k7Ydaq3DNUpNUngI6kSOAX9HW6U3QMxAmVR9dTS8VAC3jCiAgAJUqqRDeFmfecFfLfbJh5/wLTjy5ZQhdpvAAAAABJRU5ErkJggg==') no-repeat;
+    display: inline-block;
+}
+
+.navbar-brand-title {
+    padding-left: 10px;
+}
+
+.btn-default.btn-toggle-chart-controls {
+    border-color: transparent;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-right: -18px;
+}
+
+.btn-default.btn-toggle-chart-controls:hover {
+    background-color: transparent;
+    border-color: #ccc;
+}
+
+.chart-control-labels {
+    line-height: 12px;
+}
+
+.length-history-label.col-xs-2, .length-history-label.col-md-2 {
+    padding-left: 0px;
+}
+
+.rc-slider {
+    margin-top: 22px;
+}
+
+.rc-slider.col-xs-4, .rc-slider.col-md-4 {
+    width: 33.333%;
+}
+
+.app-content-wrapper canvas {
+    margin-top: 20px;
+    margin-left: 15px;
+    padding-right: 15px;
+}
