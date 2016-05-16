@@ -1,2 +1,76 @@
-# BrainspaceCodingExercise
-Coding exercise handoff for the BrainSpace guys.
+# ReactJS Coding Exercise
+Implementation of a simple stock charting app intended to demonstrate a basic understanding of React.  (Please refer to the last section in this document for notes on building and running the app.)
+
+This is intended as a "rapid prototype" and nothing more.  Many best practices are sacrificed in the interest of time; the design is rudimentary; the build process is manual for the most part; etc.  Given that this IS a very rudimentary implementation, the following outline is provided as an explanation of how I would implement things differently in a real-world scenario; and illustrate my understanding of production app design and development:
+
+## Packaging/Build Tooling
+- As I'm sure you've noticed, I did not implement any build tooling, sticking to a manual process.  
+  - For simplicity's sake, I basically put all the react component code in a single file - which itself required some NPM-installed modules and an ancillary dependency - and then ran browserify -t reactify main.js -o ../pub/js/app/stock-charting-app.js against it. - I elected to take this shortcut (along with quite a few others) in order to give myself more time to work on the app itself.
+- If I were developing an actual product, I would of course have a build pipeline.  
+  - As of this moment, the toolchain I'd probably select would be Webpack plus Babel.
+  - Webpack of course does the bundling, but also allows for hot module reloading, which is pretty awesome in a dev environment or cloud product
+  - Not only would Babel serve as my JSX transpiler, but it of course gives us the ability to use ES6+ features which it then compiles to ES5.  There are a number of very nice language features in ES6/7, and it would be cool to use them.  Of course there are other tools to give us this functionality (I was using one of them), but these tend to be the preferred set for React-based apps.
+  - Plugins exist to run Webpack within Grunt or Gulp.  If a build process were already set up for either (say, Jenkins projects/project templates are already set up for gruntfiles with predefined tasks); or if the React app(s) were a subset of a larger, non-React product/product suite; then I'd leverage grunt/gulp + Webpack + Babel...no need to overly complicate things by introducing separate build tools if a build strategy has already been defined.
+- Regardless of the specific packaging/bundling/transpiling toolchain, I'd be looking for something that would allow me to:
+  - Require npm-installed node modules from within individual modules (as opposed to leveraging the somewhat-messy requirejs)
+  - Define individual React components in separate files, with parents components requiring their children, etc.
+  - Take advantage of hot-reloading if possible - meaning it should also support the creation of multiple modules
+  - Handle transpiling of LESS to CSS, and bundling that as well as JS
+  - Be something that makes my job easier and simpler, rather than getting in my way!
+- Of course there are certain conventions for directory structure/script entry points/etc for certain tools, so that would have to change accordingly.
+
+## App Architecture
+- Overall, this app was designed very much as a PoC, but I did still try to include certain elements that were not specified as requirements, where I thought they might demonstrate additional knowledge of technology or architectural considerations.  A couple of these were:
+  - I was given the option to use basically any datasource I liked.  Using a JSON file, reading it in and memcaching it in Node, then serving it up on request to emulate an API would have been a bit easier.  However, that would mean (for my use case) the data wouldn't be up-to-date, and you'd be a bit more limited in what you could pull, so I used the Yahoo finance API for historical quoting instead, pulling just the requested data as the query criteria changed.  This was as much to demonstrate that I understand that a reverse proxy is necessary for simplifying cross-domain AJAX requests as it was to provide flexibility.
+    - The Express-hosted web API was built to support routing, with fallback path options not actually used by the app.
+  - While I restricted the stock symbols to the static set [GOOG, INTC, APLE] in order to avoid adding another API endpoint in order to pull a list from a web API, no such restriction was incorporated into the backing web API.  I actually changed those options mid-dev cycle - anyone can do it, and it will work just fine.
+  - It would have been quicker to pull in sources via script tags (rather than figuring out how to get browserify to play well with JSX, and having to manually resolve a lot of issues with npm package dependency conflicts), but wanted to at least demonstrate that I understand the need for consolidation of sources to avoid the cumulative effects of per-request latency when a certain number of scripts must be loaded synchronously up-front, or asynchronously but complete before app initialization.
+  - Separating concerns into 2 separate React components.  Could have put all 4 "controls" (stock symbols select control, days of historical data to retrieve control, show-hide query controls group button, and the chart itself) into one component, but I chose to split them up in order to demonstrate that I know how to pass data parent->child and child->parent...plus separation of concerns is always a good idea!  :-)
+  - Persisting query criteria across page refreshes/windows/etc. using localStorage.
+- If developing a product, I'd certainly look into taking the Redux+React approach.  
+  - For something as narrowly-scoped as what I wrote, there's not a lot of need to do so; but as the component library grows; and PARTICULARLY when you get into the realm of multiple, route-driven views that share data (which may not yet be persisted); and/or you wish to use the History API for back-button based UNDOs (or any other UNDOs, for that matter); or wish to add realtime updates (especially web-socket server-push stuff), that sort of central state management becomes pretty critical.
+  - If Redux was not an option for whatever reason, at the very least I'd have centralized services for persistence and state management, and use pub-sub architecture for ensuring state is properly sync'd across components.
+- Within the node web API:
+  - I'd be supporting POSTs to a query endpoint - the base API endpoint (the one with no route-driven parameterization) with the path suffix '/query'.  This would give much more flexibility, and avoid the endpoint consumer having to know exactly how symbols must be concatenated for that path parameter (which is bad practice anyway, in my opinion).  The use of a JSON request (array of symbols, number of days to look back, or date range to choose, etc) via POST to a single query endpoint allows much also allows for future-proofing the endpoint (as path-based GETS can only support so many params before they become quite unwieldy; and using a new feature would require hitting a new endpoint).
+  - App settings, such as external API parameters (URIs, API Keys, whatever), and defaults for inbound request parameter values, would be stored in an external JSON file for a standalone app  (or in a central datastore for cloud/server cluster/etc.); are loaded when server starts; and are hot-reloaded when values change.  No hardcoding!
+  - I'd be trying to increase efficiency whereever possible (even for this simple app).  The decision to do so would have to be based on a perceived problem, and justified by some load tests and probably a PoC; but assuming that it were more efficient to do so, I'd cache the results of requests AFTER serving the response...
+    - I'd asynchronously cache the results on a per-symbol basis, ordered by date, both into memory and a central store (elasticsearch or rapid-query store, probably).
+    - When a node server starts or restarts, it would likely load some of that data into memory - probably using some predictive analytics of what symbols and timespans are more likely requested.
+    - In either case, an incoming request would be analyzed for complexity, and relatively simple requests would be served from the memcache.  (5 symbols with a 30 day timespan a year ago wouldn't be a good candidate; nor would any multi-symbol request where one or more symbols did not have the date sequence cached; because piecing the results together would be a performance hit rather than performance boost).
+    - Some of this is definitely above and beyond what's necessary for such a simple app...but in the case of a production app, where response times are mission-critical, would be worth investigating.
+- Of course, on the client side I'd be using application routing, incorporating lazy module loading (for the view and its dependencies) on receipt of nav request and caching those components and states for later use on nav-off wherever possible.
+- Components would be fully separated into separate files and required as necessary.  These would be packaged separately wherever possible to support aforementioned lazy loading.  Same with assets like CSS; using font-based icons (or sprite-sheets as necessary); etc.; in order to make the app more performant.
+- There are, of course, many other modifications I'd make to the dev process and architecture, but it's hard to list specific changes without considering the application being developed.  I tend to be pragmatic about my architectural decisions.
+
+## Application-Specific Improvements
+Even for such a simple app, there are a number of things I'd have done differently if I were willing to take the time to do so (and risk having another candidate come in and get through the interview process before I do, because I was too busy trying to add bells and whistles).
+
+- Currently, the stock history timespan selection is truly duration-based, not result-count-based.  This does play well with the Yahoo finance API, as it uses startDate/endDate parameters, but does not fit the mold of certain other online tools.
+  - If I were to stick with the number of days included (like the slider does at the moment), then I'd change that to be actual NASDAQ business days.  The date range to use when hitting the Yahoo API would be calculated from that "count" value in the middleware.  Thus, if you request 10 days, you get 10 results...not a variable number of results depending on the day you make the request.
+  - However, I'd probably change it to: week/month/year based selection, so they can reasonably expect that a month will go back to the first of this month, or this day last month; and so on.
+- Maintain 'legend'/'series'/'dataset'/whatever coloring per-symbol within the current session.  Currently I'm using random color generation to specify the color for the data for a given stock symbol.  If you make any changes to the query criteria a new random color is generated when the response data is received, and that color is used for drawing the corresponding line, so the color does not persist across changes.  I'd cache the color on a per-symbol basis (maybe even to local storage, along with query criteria), so that ascertaining the identity of a given line would not require looking at a tooltip every time the chart loads.  I only left it that way because I was pushing up again the promised delivery deadline.  Drawing an actual legend might not be a bad idea either.
+- Since I'm talking about charts...I'd probably write a React component wrapping the Google chart.  It's a bit more flexible, but I don't believe it's responsive and it certainly isn't made for React.  I think I could achieve better results wrapping that control that I got from my component choice.  (In fact, I had already begun writing a React component to wrap the ChartJS library - simply because it is billed as being responsive - and had put a bit of time into that before I realized that the React-ChartJS component existed.)  
+  - I ended up leveraging that component in the interest of "speed-to-market", but have a few complaints.  One is that its "responsiveness" is not handled very well for screen height when you want to avoid page scrolling; and not being able to work directly with the chartJS API means I'm having to fight the component's API to try and fix this behavior, which was a nightmare.  A second is that redrawing the canvas every time the datasource changes becomes almost a requirement with multiple data series which can change quickly - errors are thrown by the component.
+  - I believe writing my own wrapper would have produced better results, if I had the time to do so.
+- As mentioned before, allowing for querying an external source of stock symbols when adding options to the chart via the multi-select.
+- Supporting changes of timespan through "handle"-dragging (mouse)/gesture-driven (touch) - either in addition to, or in place of, the slider.  Might prove more intuitive.
+- Include stock tickers for selected symbols above the chart, in a collapsible container (collapsed state would persist across browser sessions).
+- Completely different styling/layout.  I chose to base it on Bootstrap because of the navbar and the responsive grid.  That's always nice as a quickstart.  However, the thing is just not that pretty, and there are many alterations I would likely make if it were a focus.
+
+As I said, I'd probably come up with a lot more if I were thinking of a specific production app I'd be developing (or even knew the domain of the problem I was attempting to solve).  As stated in the preface above, these items are, for the most part, things I'd do differently (or take the time to implement) if I were  writing something that would *actually* see the light of day at some point; or which would require any future development/maintenance whatsoever.
+
+## Running the Application
+Execute the commands:
+```
+  npm install
+  node server
+```
+
+After that you should be able to access the app at the URI http://localhost:9890/index.html
+
+Note that you may see some peer dependency conflict warnings when running the *npm install* command, but that's kind of out of my hands.  I wasn't about to try and spend a day or more finding a 'clean' way around that issue (if there even is one) given the time limit for this exercise.
+
+Know that there are 2 "versions" of the app.  Right now it's running a more stripped-down "version" which relies on the "responsive" features of the chart component itself.  This 'responsive' nature is functional when it comes to screen width, but not screen height - it loves to exceed the screen height, even when it doesn't really need to.  There's another compiled bundle .\pub\js\app\stock-charting-app_withresizing.js, which was an initial attempt to override some of the height resizing of the chart...but it's a bit of a pain fighting with an underlying component you can't quite get to, and you're making some conflicting calculations with unintended consequences.  (See the improvements sections above, where I call out that - given the time - my preference would be to create my own React chart component to avoid these sorts of issues.)  
+
+In any case, if desired one can back up the stock-charting-app.js and replace it with the aforementioned bundle (renamed, of course), in order to see the result of the changes I was in the process of making.  To *just* see the source additions/changes that were included in that attempt, simply diff the .\src\main.js and .\src\main-withresizing.js files.
+
